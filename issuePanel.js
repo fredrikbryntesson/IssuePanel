@@ -98,16 +98,12 @@ function renderIssue(issue)
 	return '<li id="issue_' + issue.number + '" class="issue ' + issue.state + '">' + 
 	'<span class="number">#' + issue.number + '</span>' +
 	'<h4 class="title">' + issue.title + 
-	renderLabels(issue.labels) +
 	'</h4>' +
-	// '<dl class="meta">' + 
-	// (issue.due_on != null ? '<dt>due</dt><dl><time datetime="' + issue.due_on + '">' + issue.due_on + '</time></dl>' : '') +
-	// '<dt>created</dt><dl><time datetime="' + issue.created_at + '">' + issue.created_at + '</time> by ' + issue.user.login + '</dl>' +
-	// '<dt>updated</dt><dl><time datetime="' + issue.updated_at + '">' + issue.updated_at + '</time></dl>' +
-	// (issue.closed_at != null ? '<dt>closed</dt><dl><time datetime="' + issue.closed_at + '">' + issue.due_on + '</time></dl>' : '') +
-	// '</dl>';
-	'<p>' + issue.body + '</p>' +
-	'</li>';
+	//'<p>' + issue.body + '</p>' +
+	'<div class="meta">' +
+	'<span>' + (issue.assignee != null ? ('<img src="' + issue.assignee.avatar_url + '"/>' + issue.assignee.login) : '') + '</span>' +
+	renderLabels(issue.labels) +
+	'</div></li>';
 }
 function renderLabels(labels)
 {
@@ -123,7 +119,7 @@ function renderLabels(labels)
 }
 function loadMilestones (success, owner, repository, setHeader) {
 	$.ajax({ 
-		url: 'https://api.github.com/repos/' + owner + '/' + repository + '/milestones', 
+		url: 'https://api.github.com/repos/' + owner + '/' + repository + '/milestones?per_page=100', 
 		type: 'GET',
 		dataType: 'json',
 		beforeSend: setHeader,
@@ -132,7 +128,7 @@ function loadMilestones (success, owner, repository, setHeader) {
 }
 function loadIssues (success, owner, repository, setHeader, closed = false) {
 	$.ajax({ 
-		url: 'https://api.github.com/repos/' + owner + '/' + repository + '/issues' + (closed ? '?state=closed' : ''), 
+		url: 'https://api.github.com/repos/' + owner + '/' + repository + '/issues?per_page=100' + (closed ? ';state=closed' : ''), 
 		type: 'GET',
 		dataType: 'json',
 		beforeSend: setHeader,
