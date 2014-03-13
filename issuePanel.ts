@@ -78,7 +78,7 @@ function renderMilestone(milestone, issues)
 	'<p>' + milestone.description + '</p>' +
 	'<ul>';
 	for (var i = 0; i < issues.length; i++)
-		if (issues[i].milestone.id == milestone.id)
+		if (issues[i].milestone !== null && issues[i].milestone.id == milestone.id)
 			result += renderIssue(issues[i]);
 	result += '</ul></li>';
 	return result;
