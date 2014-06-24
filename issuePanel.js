@@ -43,7 +43,11 @@ function loadData(owner, repository, setHeader, title) {
     var update = function () {
         if (milestones !== null && open !== null && closed !== null) {
             var issues = open.concat(closed);
-            var content = ((title !== null && title !== "") ? '<header><h1>' + title + '</h1></header>' : '') + '<ul>';
+            var content = '<ul>';
+            if (title !== null && title !== "") {
+                content = '<header><h1>' + title + '</h1></header>' + content;
+                document.title = title;
+            }
             for (var i = 0; i < milestones.length; i++)
                 content += renderMilestone(milestones[i], issues);
             content += '</ul>';
