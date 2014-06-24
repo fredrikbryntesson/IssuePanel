@@ -1,14 +1,42 @@
 /// <reference path="jquery.d.ts" />
 /// <reference path="jquery.base64.d.ts" />
+function saveForm()
+{
+	var authorization = makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
+	saveSettings(
+        document.forms['configure']['owner'].value,
+        document.forms['configure']['repository'].value, 
+        authorization,
+        document.forms['configure']['title'].value
+        );
+    loadContent();
+    return false;
+}
+function saveSettings(owner, repository, authorization, title = null)
+{
+	var settings = { owner : owner, repository : repository, authorization : authorization, title : title };
+	localStorage.setItem("IssuePanel.settings", JSON.stringify(settings)); 
+}
+function loadSettings() : { owner : string; repository : string; authorization : string; title : string }
+{
+	return JSON.parse(localStorage.getItem("IssuePanel.settings")); 
+}
 function loadContent()
 {
-	var authentication = makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
-    loadData(
-        document.forms['configure']['owner'].value,
-        document.forms['configure']['repository'].value, header => header.setRequestHeader('Authorization', authentication)
-        );
-    console.log("form handled");
-	return false;
+    var settings = loadSettings();
+    var result : boolean;
+    if (result = settings !== null)
+    {
+        console.log("Load Content Settings: " + JSON.stringify(settings));
+        loadData(
+            settings.owner,
+            settings.repository, 
+            header => header.setRequestHeader('Authorization', settings.authorization),
+            settings.title
+            );
+        document.getElementById("settings").style.visibility = "hidden";
+    }
+	return result;
 }
 
 function makeBasicAuthentication(user, password) {
@@ -16,7 +44,7 @@ function makeBasicAuthentication(user, password) {
   var hash = btoa(tok);
   return "Basic " + hash;
 }
-function loadData(owner, repository, setHeader) {
+function loadData(owner, repository, setHeader, title = null) {
 	var milestones = null;
 	var milestonesETag = null;
 	var open = null;
@@ -27,7 +55,7 @@ function loadData(owner, repository, setHeader) {
 		if (milestones !== null && open !== null && closed !== null)
 		{
 			var issues = open.concat(closed);
-			var content = '<ul>';
+			var content = ((title !== null && title !== "") ? '<header><h1>' + title + '</h1></header>' : '') + '<ul>';
 			for (var i = 0; i < milestones.length; i++)
 				content += renderMilestone(milestones[i], issues);
 			content += '</ul>';
@@ -122,7 +150,8 @@ function loadMilestones (success, owner, repository, setHeader) {
 		beforeSend: setHeader,
 		success: success,
         error: (jqHXR, textStatus, errorThrown) => {
-            console.log(textStatus);
+            console.log("Error loading milestones.")
+            document.getElementById("settings").style.visibility = "visible";
         }
 	});
 }
@@ -134,10 +163,13 @@ function loadIssues (success, owner, repository, setHeader, closed = false) {
         beforeSend: setHeader,
         success: success,
         error: (jqHXR, textStatus, errorThrown) => {
-            console.log(textStatus);
+            console.log("Error loading issues.")
+            document.getElementById("settings").style.visibility = "visible";
         }
 	});
 }
 $(document).ready(() => {
-    $('#open').click(loadContent);
+    $('#open').click(saveForm);
+    $('#openSettings').click(() => { document.getElementById("settings").style.visibility = "visible"; return false; });
+    loadContent();
 });

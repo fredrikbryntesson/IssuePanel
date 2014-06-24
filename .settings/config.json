@@ -1,14 +1,14 @@
 {
-    "version" : "1.0",    
+    "theme": "Tomorrow Night",
+    "fontSize": 12,
     "main": "index.html",
-    "sourcePath": null,
-    "outputPath": null,
     "compiler": {
         "useDefaultLib": true,
-        "emitComments": false,
-        "generateDeclarationFiles": false,
-        "mapSourceFiles": false,
-        "outputOption" : "",
+        "outputMany": true,
+        "outputFileName": "issuePanel.js",
+        "emitComments": true,
+        "generateDeclarationFiles": true,
+        "mapSourceFiles": 1,
         "codeGenTarget": 1,
         "moduleGenTarget": 0
     },
