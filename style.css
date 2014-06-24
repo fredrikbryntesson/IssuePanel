@@ -16,14 +16,20 @@ section > ul
     position: fixed;
     top: 0px;
     left: 0px;
-    background: rgba(255, 255, 255, 200);
+    background: rgba(255, 255, 255, 0.8);
     width: 100%;
-/*    height: 100%;*/
+    height: 100%;
+    z-index: 5; 
+}
+#settings > * {
+    background: rgba(255, 255, 255, 1);
+    width: auto;
+    margin: auto auto;
 }
 body > footer {
     position: fixed;
-    bottom: 0px;
-    right: 0px;
+    bottom: 0;
+    right: 0;
 }
 .milestone {
 	display: table-cell;
