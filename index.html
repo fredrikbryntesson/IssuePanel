@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html manifest="app.manifest">  
 	<head>
 		<meta charset="utf-8" />
@@ -12,17 +12,21 @@
 		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 	</head>
 	<body>
-	<header><h1>Issues</h1></header>
-	<section id="content">
-		<form name="configure" action="">
-			<fieldset>
-				<label for="owner">owner:</label><input type="text" name="owner"><br>
-				<label for="repository">repository:</label><input type="text" name="repository"><br>
-				<label for="user">user:</label><input type="text" name="user"><br>
-				<label for="password">password:</label><input type="password" name="password"><br>
-				<input id="open" type="submit" value="open" />
-			</fieldset>
-		</form>
-	</section>
+    	<article id="content">
+    	</article>
+    	<article id="settings">
+        	<header><h1>Settings</h1></header>
+        	<form name="configure" action="">
+        		<fieldset>
+        			<label for="title">title:</label><input type="text" name="title"><br>
+        			<label for="owner">owner:</label><input type="text" name="owner"><br>
+        			<label for="repository">repository:</label><input type="text" name="repository"><br>
+        			<label for="user">user:</label><input type="text" name="user"><br>
+        			<label for="password">password:</label><input type="password" name="password"><br>
+        			<input id="open" type="submit" value="open" />
+        		</fieldset>
+        	</form>
+        </article>
 	</body>
+	<footer><a id="openSettings" href="">settings</a></footer>
 </html>
