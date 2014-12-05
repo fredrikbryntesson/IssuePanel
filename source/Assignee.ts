@@ -1,4 +1,4 @@
-class Assignee {
+/*class Assignee {
 	private avatar_url: string;
 	private login: string;
 	constructor() {
@@ -6,4 +6,4 @@ class Assignee {
 	Render(): string {
 		return '<img src="' + this.avatar_url + '"/>' + this.login;
 	}
-}
+}*/

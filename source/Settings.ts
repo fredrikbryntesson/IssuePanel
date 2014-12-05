@@ -1,4 +1,4 @@
-class Settings {
+/*class Settings {
     private owner: string;
     private repository: string;
     private authorization: string;
@@ -27,4 +27,4 @@ class Settings {
     {
     	return JSON.parse(localStorage.getItem("IssuePanel.settings")); 
     }
-}
+}*/

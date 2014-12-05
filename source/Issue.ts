@@ -1,4 +1,4 @@
-class Issue {
+/*class Issue {
     private number: number;
     private state: string;
     private title: string;
@@ -29,4 +29,4 @@ class Issue {
     	}
     	return result;
     }
-}
+}*/

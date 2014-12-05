@@ -1,4 +1,4 @@
-class Milestone {
+/*class Milestone {
     private id: number;
     private title: string;
     private description: string;
@@ -29,4 +29,4 @@ class Milestone {
     	'</span>';
     }
 
-}
+}*/
