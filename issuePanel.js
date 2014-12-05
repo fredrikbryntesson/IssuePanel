@@ -1,3 +1,6 @@
+function myfunction() {
+    alert("remove this");
+}
 var Settings = (function () {
     function Settings() {
     }
@@ -91,10 +94,11 @@ var Assignee = (function () {
     return Assignee;
 })();
 var Milestone = (function () {
-    function Milestone(id, title, description, open_issues, closed_issues) {
+    function Milestone(id, title, description, open_issues, closed_issues, owner, repository) {
         var _this = this;
         this.render = function (issues) {
-            var result = '<li class="milestone">' + '<div class="progress">' + _this.renderProgress() + '</div>' + '<h3 class="title">' + _this.title + '</h3>' + '<p>' + _this.description + '</p>' + '<ul>';
+            var html_url = 'https://github.com/' + _this.owner + '/' + _this.repository + '/milestones/' + _this.title;
+            var result = '<li class="milestone">' + '<div class="progress">' + _this.renderProgress() + '</div>' + '<h3 class="title" onclick="window.open(\'' + html_url + '\').focus()">' + _this.title + '</h3>' + '<p>' + _this.description + '</p>' + '<ul>';
             for (var i = 0; i < issues.length; i++) {
                 if (issues[i].milestoneID !== null && issues[i].milestoneID == _this.id)
                     result += issues[i].render();
@@ -107,6 +111,8 @@ var Milestone = (function () {
         this.description = description;
         this.open_issues = open_issues;
         this.closed_issues = closed_issues;
+        this.owner = owner;
+        this.repository = repository;
     }
     Object.defineProperty(Milestone.prototype, "finished", {
         get: function () {
@@ -158,7 +164,7 @@ var LoadData = (function () {
                     _this.milestonesETag = eTag;
                     _this.milestones = [];
                     for (var i = 0; i < data.length; i++) {
-                        _this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues);
+                        _this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues, settings.owner, settings.repository);
                     }
                     _this.update(settings);
                 }

@@ -1,3 +1,7 @@
+function myfunction() {
+    alert("remove this");
+}
+
 class Settings {
     public owner: string;
     public repository: string;
@@ -128,20 +132,27 @@ class Milestone {
     private closed_issues: number;
     public openIssues: Issue[];
     public closedIssues: Issue[];
-    private html_url: string;
+    private owner: string;
+    private repository: string;
     
-    constructor(id: number, title: string, description: string, open_issues: number, closed_issues: number) {
+    constructor(id: number, title: string, description: string, open_issues: number, closed_issues: number, owner: string, repository: string) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.open_issues = open_issues;
         this.closed_issues = closed_issues;
+        this.owner = owner;
+        this.repository = repository;
     }
     get finished(): number {
         return 100.0 * this.closed_issues / (this.open_issues + this.closed_issues);
     }
     render = (issues: Issue[]): string => {
-    	var result = '<li class="milestone">' + '<div class="progress">' + this.renderProgress() + '</div>' + '<h3 class="title">' + this.title + '</h3>' + '<p>' + this.description + '</p>' + '<ul>';
+        var html_url = 'https://github.com/' + this.owner + '/' + this.repository + '/milestones/' + this.title; 
+    	var result = '<li class="milestone">' +
+    	'<div class="progress">' + this.renderProgress() + 
+    	'</div>' + '<h3 class="title" onclick="window.open(\'' + html_url+'\').focus()">' +this.title + '</h3>' + 
+    	'<p>' + this.description + '</p>' + '<ul>';
         for (var i = 0; i < issues.length; i++) {
             if (issues[i].milestoneID !== null && issues[i].milestoneID == this.id)
                 result += issues[i].render();
@@ -207,7 +218,7 @@ class LoadData {
                 this.milestonesETag = eTag;
                  this.milestones = [];
                 for (var i = 0; i < data.length; i++) {
-                    this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues);
+                    this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues, settings.owner, settings.repository);
                 }
                 this.update(settings);
             }
