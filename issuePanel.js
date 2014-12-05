@@ -37,12 +37,10 @@ var Label = (function () {
     return Label;
 })();
 var Issue = (function () {
-    function Issue(number, state, title, assignee, milestoneID, labels) {
+    function Issue(number, state, title, assignee, milestoneID, labels, url) {
         var _this = this;
         this.render = function () {
-            //  '<div onclick="alert('You clicked me !')">Click Me</div>'
-            //  <a href="http://google.com">link</a>
-            var result = '<li id="issue_' + _this.number + '" class="issue ' + _this.state + '">' + '<span class="number">#' + _this.number + '</span>' + '<h4 class="title">' + _this.title + '</h4>' + '<div class="meta">' + '<span>' + (_this.assignee !== null ? _this.assignee.render() : '') + '</span>' + _this.renderLabels() + '</div></li>';
+            var result = '<li id="issue_' + _this.number + '" class="issue ' + _this.state + '" onclick="window.open(\'' + _this.html_url + ',_blank\').focus()">' + '<span class="number">#' + _this.number + '</span>' + '<h4 class="title">' + _this.title + '</h4>' + '<div class="meta">' + '<span>' + (_this.assignee !== null ? _this.assignee.render() : '') + '</span>' + _this.renderLabels() + '</div></li>';
             return result;
         };
         this.number = number;
@@ -51,6 +49,7 @@ var Issue = (function () {
         this.assignee = assignee;
         this.milestoneID = milestoneID;
         this.labels = labels;
+        this.html_url = url;
     }
     Issue.prototype.renderLabels = function () {
         var result = '';
@@ -188,7 +187,7 @@ var LoadData = (function () {
                         if (data[i].assignee !== null) {
                             assignee = new Assignee(data[i].assignee.avatar_url, data[i].assignee.login);
                         }
-                        _this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels);
+                        _this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
                     }
                     _this.update(settings);
                 }
@@ -217,7 +216,7 @@ var LoadData = (function () {
                         if (data[i].assignee !== null) {
                             assignee = new Assignee(data[i].assignee.avatar_url, data[i].assignee.login);
                         }
-                        _this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels);
+                        _this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
                     }
                     _this.update(settings);
                 }

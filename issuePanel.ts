@@ -55,24 +55,25 @@ class Issue {
     private avatar_url: string;
     private login: string;
     private labels: Label[];
-    public milestoneID: number
-    constructor(number: number, state: string, title: string, assignee: Assignee, milestoneID: number, labels: Label[]) {
+    public milestoneID: number;
+    private html_url: string;
+    constructor(number: number, state: string, title: string, assignee: Assignee, milestoneID: number, labels: Label[], url: string) {
         this.number = number;
         this.state = state;
         this.title = title;
         this.assignee = assignee;
         this.milestoneID = milestoneID
         this.labels = labels;
+        this.html_url = url;
     } 
     render = (): string  => {
-        //  '<div onclick="alert('You clicked me !')">Click Me</div>'
-        //  <a href="http://google.com">link</a>
-    	var result  = '<li id="issue_' + this.number + '" class="issue ' + this.state + '">' +
+    	var result  = '<li id="issue_' + this.number + '" class="issue ' + this.state + 
+    	'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' + 
     	'<span class="number">#' + this.number + '</span>' +
     	'<h4 class="title">' + this.title + 
     	'</h4>' +
     	//'<p>' + this.body + '</p>' +
-    	'<div class="meta">' + 
+    	'<div class="meta">' +
     	'<span>' + (this.assignee !== null ? this.assignee.render() : '') + '</span>' +
     	this.renderLabels() +
     	'</div></li>';
@@ -127,7 +128,7 @@ class Milestone {
     private closed_issues: number;
     public openIssues: Issue[];
     public closedIssues: Issue[];
-    public data;
+    private html_url: string;
     
     constructor(id: number, title: string, description: string, open_issues: number, closed_issues: number) {
         this.id = id;
@@ -235,7 +236,7 @@ class LoadData {
                     if (data[i].assignee !== null) {
                         assignee = new Assignee(data[i].assignee.avatar_url,data[i].assignee.login);
                     }
-                    this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels);
+                    this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
                 }
                 this.update(settings);
             }
@@ -265,7 +266,7 @@ class LoadData {
                     if (data[i].assignee !== null) {
                         assignee = new Assignee(data[i].assignee.avatar_url,data[i].assignee.login);
                     }
-                    this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels);
+                    this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
                 }
                 this.update(settings);
             }
