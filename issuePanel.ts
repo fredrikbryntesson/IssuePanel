@@ -1,6 +1,24 @@
 function myfunction() {
     alert("remove this");
 }
+function amIclicked(e, element)
+{
+    e = e || event;
+    var target = e.target || e.srcElement;
+    if(target.id==element.id)
+        return true;
+    else
+        return false;
+}
+
+    
+function openLink(e, element) {
+    alert('before');
+    e = e || event;
+    var target = e.target || e.srcElement;
+    if(target.id==element.id)
+        alert('open link');
+}
 
 class Settings {
     public owner: string;
@@ -42,12 +60,30 @@ class Settings {
 class Label {
     private color: string;
     private name: string;
-    constructor(color: string, name: string) {
+    private owner: string;
+    private repository: string;
+    constructor(color: string, name: string, owner: string, repository: string) {
         this.color = color;
         this.name = name;
+        this.owner = owner;
+        this.repository = repository;
     }
     render(): string {
-        return '<span style="background: #' + this.color + '">' + this.name + '</span>';
+        
+        //alert(this.color);
+        var background = '';
+        var asDecimal = parseInt(this.color, 16);
+        //alert('title ' + this.name + '- ' +  asDecimal);
+        if (asDecimal > 7814560) {
+        //if (asDecimal > 38911) {
+            background = 'lightBackground';
+        }
+        else background = 'darkBackground';
+        var html_url = 'https://github.com/' + this.owner +'/'+ this.repository + '/labels/' + this.name + '/';
+        return '<span  onclick="window.open(\'' + html_url+'\').focus()" style="background: #' + this.color + '" span< class="' + background  + '">' + this.name + '</span>';
+        
+        
+        //return '<span  onclick="window.open(\'' + html_url+'\').focus()" style="background: #' + this.color + '">' + this.name + '</span>';
     }
 }
 
@@ -61,7 +97,8 @@ class Issue {
     private labels: Label[];
     public milestoneID: number;
     private html_url: string;
-    constructor(number: number, state: string, title: string, assignee: Assignee, milestoneID: number, labels: Label[], url: string) {
+    private body: string;
+    constructor(number: number, state: string, title: string, assignee: Assignee, milestoneID: number, labels: Label[], url: string, body: string) {
         this.number = number;
         this.state = state;
         this.title = title;
@@ -69,9 +106,11 @@ class Issue {
         this.milestoneID = milestoneID
         this.labels = labels;
         this.html_url = url;
+        this.body = body;
     } 
     render = (): string  => {
     	var result  = '<li id="issue_' + this.number + '" class="issue ' + this.state + 
+    	//'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' + 
     	'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' + 
     	'<span class="number">#' + this.number + '</span>' +
     	'<h4 class="title">' + this.title + 
@@ -83,11 +122,11 @@ class Issue {
     	'</div></li>';
     	return result;
     }
-    private renderLabels(): string 
-    {
+    private renderLabels(): string {
     	var result = '';
     	if (this.labels !== null)
     	{
+    		//result += '<span class="labels">';
     		result += '<span class="labels">';
     		for (var k = 0; k < this.labels.length; k++) {
     			result += this.labels[k].render();
@@ -152,6 +191,7 @@ class Milestone {
     	var result = '<li class="milestone">' +
     	'<div class="progress">' + this.renderProgress() + 
     	'</div>' + '<h3 class="title" onclick="window.open(\'' + html_url+'\').focus()">' +this.title + '</h3>' + 
+
     	'<p>' + this.description + '</p>' + '<ul>';
         for (var i = 0; i < issues.length; i++) {
             if (issues[i].milestoneID !== null && issues[i].milestoneID == this.id)
@@ -240,14 +280,14 @@ class LoadData {
                     var labels = [];
                     if (data[i].labels !== null) {
                         for (var j = 0; j < data[i].labels.length; j++) {
-                            labels[j] = new Label(data[i].labels[j].color,data[i].labels[j].name);
+                            labels[j] = new Label(data[i].labels[j].color,data[i].labels[j].name, settings.owner, settings.repository);
                         }
                     }
                     var assignee = null;
                     if (data[i].assignee !== null) {
                         assignee = new Assignee(data[i].assignee.avatar_url,data[i].assignee.login);
                     }
-                    this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
+                    this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url, data[i].body);
                 }
                 this.update(settings);
             }
@@ -270,14 +310,14 @@ class LoadData {
                     var labels = [];
                     if (data[i].labels !== null) {
                         for (var j = 0; j < data[i].labels.length; j++) {
-                            labels[j] = new Label(data[i].labels[j].color,data[i].labels[j].name);
+                            labels[j] = new Label(data[i].labels[j].color,data[i].labels[j].name, settings.owner, settings.repository);
                         }
                     }
                     var assignee = null;
                     if (data[i].assignee !== null) {
                         assignee = new Assignee(data[i].assignee.avatar_url,data[i].assignee.login);
                     }
-                    this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
+                    this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url, data[i].body);
                 }
                 this.update(settings);
             }
