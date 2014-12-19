@@ -1,24 +1,3 @@
-function myfunction() {
-    alert("remove this");
-}
-function amIclicked(e, element)
-{
-    e = e || event;
-    var target = e.target || e.srcElement;
-    if(target.id==element.id)
-        return true;
-    else
-        return false;
-}
-
-    
-function openLink(e, element) {
-    alert('before');
-    e = e || event;
-    var target = e.target || e.srcElement;
-    if(target.id==element.id)
-        alert('open link');
-}
 
 class Settings {
     public owner: string;
@@ -70,10 +49,8 @@ class Label {
     }
     render(): string {
         
-        //alert(this.color);
         var background = '';
         var asDecimal = parseInt(this.color, 16);
-        //alert('title ' + this.name + '- ' +  asDecimal);
         if (asDecimal > 7814560) {
         //if (asDecimal > 38911) {
             background = 'lightBackground';
@@ -81,8 +58,6 @@ class Label {
         else background = 'darkBackground';
         var html_url = 'https://github.com/' + this.owner +'/'+ this.repository + '/labels/' + this.name + '/';
         return '<span  onclick="window.open(\'' + html_url+'\').focus()" style="background: #' + this.color + '" span< class="' + background  + '">' + this.name + '</span>';
-        
-        
         //return '<span  onclick="window.open(\'' + html_url+'\').focus()" style="background: #' + this.color + '">' + this.name + '</span>';
     }
 }
@@ -326,7 +301,7 @@ class LoadData {
             if (this.closedETag !== null)
             header.setRequestHeader('If-None-Match', this.closedETag);
         }, true);
-        //setTimeout(this.reload(settings, setHeader), 60000);
+        setTimeout(this.reload(settings, setHeader), 60000);
     }
     loadContent(settings: Settings) {
         var result;
