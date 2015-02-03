@@ -101,7 +101,6 @@ class Issue {
     	var result = '';
     	if (this.labels !== null)
     	{
-    		//result += '<span class="labels">';
     		result += '<span class="labels">';
     		for (var k = 0; k < this.labels.length; k++) {
     			result += this.labels[k].render();
