@@ -1,4 +1,4 @@
-
+/// <reference path="jquery.d.ts" />
 class Settings {
     public owner: string;
     public repository: string;
@@ -204,7 +204,8 @@ class LoadData {
     private closed: Issue[];
     private closedETag: String;
     constructor() {
-        this.milestones = null;
+        //this.milestones = null;
+		this.milestones = [];
         this.milestonesETag = null
         this.open = null;
         this.openETag = null;
@@ -231,7 +232,7 @@ class LoadData {
             var eTag = request.getResponseHeader('ETag');
             if (this.milestonesETag != eTag) {
                 this.milestonesETag = eTag;
-                 this.milestones = [];
+                 //this.milestones = [];
                 for (var i = 0; i < data.length; i++) {
                     this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues, settings.owner, settings.repository);
                 }
@@ -242,7 +243,7 @@ class LoadData {
             if (this.milestonesETag !== null) 
                 header.setRequestHeader('If-None-Match', this.milestonesETag);
         });
-        Issue.loadIssues((data, status, request) => {
+       Issue.loadIssues((data, status, request) => {
             var eTag = request.getResponseHeader('ETag');
             if (this.openETag != eTag) {
                 this.openETag = eTag;
@@ -301,7 +302,7 @@ class LoadData {
             if (this.closedETag !== null)
             header.setRequestHeader('If-None-Match', this.closedETag);
         }, true);
-        setTimeout(this.reload(settings, setHeader), 60000);
+		setTimeout(this.reload, 60000,settings, setHeader);
     }
     loadContent(settings: Settings) {
         var result;
