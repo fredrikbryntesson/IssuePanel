@@ -1,17 +1,16 @@
-function myfunction() {
-    alert("remove this");
-}
+/// <reference path="jquery.d.ts" />
 var Settings = (function () {
     function Settings() {
     }
     Settings.prototype.saveForm = function () {
         var authorization = this.makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
         this.saveSettings(document.forms['configure']['owner'].value, document.forms['configure']['repository'].value, authorization, document.forms['configure']['title'].value);
+
         //loadContent();
         return false;
     };
     Settings.prototype.saveSettings = function (owner, repository, authorization, title) {
-        if (title === void 0) { title = null; }
+        if (typeof title === "undefined") { title = null; }
         var settings = { owner: owner, repository: repository, authorization: authorization, title: title };
         this.owner = owner;
         this.repository = repository;
@@ -29,18 +28,31 @@ var Settings = (function () {
     };
     return Settings;
 })();
+
 var Label = (function () {
-    function Label(color, name) {
+    function Label(color, name, owner, repository) {
         this.color = color;
         this.name = name;
+        this.owner = owner;
+        this.repository = repository;
     }
     Label.prototype.render = function () {
-        return '<span style="background: #' + this.color + '">' + this.name + '</span>';
+        var background = '';
+        var asDecimal = parseInt(this.color, 16);
+        if (asDecimal > 7814560) {
+            //if (asDecimal > 38911) {
+            background = 'lightBackground';
+        } else
+            background = 'darkBackground';
+        var html_url = 'https://github.com/' + this.owner + '/' + this.repository + '/labels/' + this.name + '/';
+        return '<span  onclick="window.open(\'' + html_url + '\').focus()" style="background: #' + this.color + '" span< class="' + background + '">' + this.name + '</span>';
+        //return '<span  onclick="window.open(\'' + html_url+'\').focus()" style="background: #' + this.color + '">' + this.name + '</span>';
     };
     return Label;
 })();
+
 var Issue = (function () {
-    function Issue(number, state, title, assignee, milestoneID, labels, url) {
+    function Issue(number, state, title, assignee, milestoneID, labels, url, body) {
         var _this = this;
         this.render = function () {
             var result = '<li id="issue_' + _this.number + '" class="issue ' + _this.state + '" onclick="window.open(\'' + _this.html_url + ',_blank\').focus()">' + '<span class="number">#' + _this.number + '</span>' + '<h4 class="title">' + _this.title + '</h4>' + '<div class="meta">' + '<span>' + (_this.assignee !== null ? _this.assignee.render() : '') + '</span>' + _this.renderLabels() + '</div></li>';
@@ -53,6 +65,7 @@ var Issue = (function () {
         this.milestoneID = milestoneID;
         this.labels = labels;
         this.html_url = url;
+        this.body = body;
     }
     Issue.prototype.renderLabels = function () {
         var result = '';
@@ -83,6 +96,7 @@ var Issue = (function () {
     };
     return Issue;
 })();
+
 var Assignee = (function () {
     function Assignee(avatar_url, login) {
         this.avatar_url = avatar_url;
@@ -93,6 +107,7 @@ var Assignee = (function () {
     };
     return Assignee;
 })();
+
 var Milestone = (function () {
     function Milestone(id, title, description, open_issues, closed_issues, owner, repository) {
         var _this = this;
@@ -121,6 +136,7 @@ var Milestone = (function () {
         enumerable: true,
         configurable: true
     });
+
     Milestone.prototype.renderProgress = function () {
         return '<span class="progress-bar">' + '<span class="progress" style="width: ' + this.finished + '%" ></span>' + '<span class="percent">' + Math.round(this.finished) + '%</span>' + '</span>';
     };
@@ -139,6 +155,7 @@ var Milestone = (function () {
     };
     return Milestone;
 })();
+
 var LoadData = (function () {
     function LoadData() {
         var _this = this;
@@ -162,7 +179,7 @@ var LoadData = (function () {
                 var eTag = request.getResponseHeader('ETag');
                 if (_this.milestonesETag != eTag) {
                     _this.milestonesETag = eTag;
-                    _this.milestones = [];
+
                     for (var i = 0; i < data.length; i++) {
                         _this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues, settings.owner, settings.repository);
                     }
@@ -186,14 +203,14 @@ var LoadData = (function () {
                         var labels = [];
                         if (data[i].labels !== null) {
                             for (var j = 0; j < data[i].labels.length; j++) {
-                                labels[j] = new Label(data[i].labels[j].color, data[i].labels[j].name);
+                                labels[j] = new Label(data[i].labels[j].color, data[i].labels[j].name, settings.owner, settings.repository);
                             }
                         }
                         var assignee = null;
                         if (data[i].assignee !== null) {
                             assignee = new Assignee(data[i].assignee.avatar_url, data[i].assignee.login);
                         }
-                        _this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
+                        _this.open[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url, data[i].body);
                     }
                     _this.update(settings);
                 }
@@ -204,6 +221,7 @@ var LoadData = (function () {
             }, false);
             Issue.loadIssues(function (data, status, request) {
                 var eTag = request.getResponseHeader('ETag');
+
                 if (_this.closedETag != eTag) {
                     _this.closedETag = eTag;
                     _this.closed = [];
@@ -215,14 +233,14 @@ var LoadData = (function () {
                         var labels = [];
                         if (data[i].labels !== null) {
                             for (var j = 0; j < data[i].labels.length; j++) {
-                                labels[j] = new Label(data[i].labels[j].color, data[i].labels[j].name);
+                                labels[j] = new Label(data[i].labels[j].color, data[i].labels[j].name, settings.owner, settings.repository);
                             }
                         }
                         var assignee = null;
                         if (data[i].assignee !== null) {
                             assignee = new Assignee(data[i].assignee.avatar_url, data[i].assignee.login);
                         }
-                        _this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url);
+                        _this.closed[i] = new Issue(data[i].number, data[i].state, data[i].title, assignee, milestoneID, labels, data[i].html_url, data[i].body);
                     }
                     _this.update(settings);
                 }
@@ -231,9 +249,10 @@ var LoadData = (function () {
                 if (_this.closedETag !== null)
                     header.setRequestHeader('If-None-Match', _this.closedETag);
             }, true);
-            //setTimeout(this.reload(settings, setHeader), 60000);
+            setTimeout(_this.reload, 60000, settings, setHeader);
         };
-        this.milestones = null;
+        //this.milestones = null;
+        this.milestones = [];
         this.milestonesETag = null;
         this.open = null;
         this.openETag = null;
@@ -253,6 +272,7 @@ var LoadData = (function () {
     };
     return LoadData;
 })();
+
 function exec() {
     var settings = new Settings();
     settings.saveForm();
@@ -260,6 +280,7 @@ function exec() {
     loader.loadContent(settings);
     return false;
 }
+
 $(document).ready(function () {
     $('#open').click(exec);
     $('#openSettings').click(function () {
