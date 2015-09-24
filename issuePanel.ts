@@ -6,14 +6,21 @@ class Settings {
     public title : string;
     saveForm()
     {
-    	var authorization = this.makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
-    	this.saveSettings(
-            document.forms['configure']['owner'].value,
-            document.forms['configure']['repository'].value, 
-            authorization,
-            document.forms['configure']['title'].value
+      var url = document.location.toString();
+      var result = this.checkURL(url);
+      if(result == "" ||  result == url)   {
+        var authorization = this.makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
+        this.saveSettings(
+              document.forms['configure']['owner'].value,
+              document.forms['configure']['repository'].value,
+              authorization,
+              document.forms['configure']['title'].value
             );
-        //loadContent();
+      }
+      else {
+        this.saveSettingsURL(url);
+      }
+      //loadContent();
         return false;
     }
     saveSettings(owner, repository, authorization, title = null)
@@ -23,7 +30,27 @@ class Settings {
     	this.repository = repository;
     	this.authorization = authorization;
     	this.title = title;
-    	localStorage.setItem("IssuePanel.settings", JSON.stringify(settings)); 
+    	localStorage.setItem("IssuePanel.settings", JSON.stringify(settings));
+    }
+
+    checkURL(url) {
+      var queryStart = url.indexOf("?") + 1;
+      var queryEnd   = url.indexOf("#") + 1 || url.length + 1;
+      var query = url.slice(queryStart, queryEnd - 1);
+      return query
+    }
+    saveSettingsURL(url)
+    {
+      var queryStart = url.indexOf("?") + 1;
+      var queryEnd   = url.indexOf("#") + 1 || url.length + 1;
+      var query = url.slice(queryStart, queryEnd - 1);
+      var pairs = query.replace(/\+/g, " ").split("&");
+      this.title = pairs[0]
+      this.owner = pairs[1]
+      this.repository = pairs[2]
+      this.authorization = pairs[3]
+      var settings = { owner : this.owner, repository : this.repository, authorization : this.authorization, title : this.title };
+      localStorage.setItem("IssuePanel.settings", JSON.stringify(settings));
     }
     makeBasicAuthentication(user, password) {
         var tok = user + ':' + password;
@@ -32,7 +59,7 @@ class Settings {
 }
     static load(): Settings
     {
-    	return JSON.parse(localStorage.getItem("IssuePanel.settings")); 
+    	return JSON.parse(localStorage.getItem("IssuePanel.settings"));
     }
 }
 
@@ -48,7 +75,7 @@ class Label {
         this.repository = repository;
     }
     render(): string {
-        
+
         var background = '';
         var asDecimal = parseInt(this.color, 16);
         if (asDecimal > 7814560) {
@@ -82,13 +109,13 @@ class Issue {
         this.labels = labels;
         this.html_url = url;
         this.body = body;
-    } 
+    }
     render = (): string  => {
-    	var result  = '<li id="issue_' + this.number + '" class="issue ' + this.state + 
-    	//'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' + 
-    	'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' + 
+    	var result  = '<li id="issue_' + this.number + '" class="issue ' + this.state +
+    	//'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' +
+    	'" onclick="window.open(\'' + this.html_url+',_blank\').focus()">' +
     	'<span class="number">#' + this.number + '</span>' +
-    	'<h4 class="title">' + this.title + 
+    	'<h4 class="title">' + this.title +
     	'</h4>' +
     	//'<p>' + this.body + '</p>' +
     	'<div class="meta">' +
@@ -147,7 +174,7 @@ class Milestone {
     public closedIssues: Issue[];
     private owner: string;
     private repository: string;
-    
+
     constructor(id: number, title: string, description: string, open_issues: number, closed_issues: number, owner: string, repository: string) {
         this.id = id;
         this.title = title;
@@ -161,10 +188,10 @@ class Milestone {
         return 100.0 * this.closed_issues / (this.open_issues + this.closed_issues);
     }
     render = (issues: Issue[]): string => {
-        var html_url = 'https://github.com/' + this.owner + '/' + this.repository + '/milestones/' + this.title; 
+        var html_url = 'https://github.com/' + this.owner + '/' + this.repository + '/milestones/' + this.title;
     	var result = '<li class="milestone">' +
-    	'<div class="progress">' + this.renderProgress() + 
-    	'</div>' + '<h3 class="title" onclick="window.open(\'' + html_url+'\').focus()">' +this.title + '</h3>' + 
+    	'<div class="progress">' + this.renderProgress() +
+    	'</div>' + '<h3 class="title" onclick="window.open(\'' + html_url+'\').focus()">' +this.title + '</h3>' +
 
     	'<p>' + this.description + '</p>' + '<ul>';
         for (var i = 0; i < issues.length; i++) {
@@ -176,7 +203,7 @@ class Milestone {
     }
     private renderProgress(): string {
     	return 	'<span class="progress-bar">' +
-    	'<span class="progress" style="width: ' + this.finished + '%" ></span>' + 
+    	'<span class="progress" style="width: ' + this.finished + '%" ></span>' +
     	'<span class="percent">' + Math.round(this.finished) + '%</span>' +
     	'</span>';
     }
@@ -239,7 +266,7 @@ class LoadData {
             }
         }, settings.owner, settings.repository, (header) => {
              setHeader(header);
-            if (this.milestonesETag !== null) 
+            if (this.milestonesETag !== null)
                 header.setRequestHeader('If-None-Match', this.milestonesETag);
         });
        Issue.loadIssues((data, status, request) => {
@@ -312,7 +339,7 @@ class LoadData {
             });
             document.getElementById("settings").style.visibility = "hidden";
         }
-        return result; 
+        return result;
     }
 }
 
@@ -325,6 +352,7 @@ function exec() {
 }
 
 $(document).ready(function () {
+    exec();
     $('#open').click(exec);
     $('#openSettings').click(function () {
         document.getElementById("settings").style.visibility = "visible";

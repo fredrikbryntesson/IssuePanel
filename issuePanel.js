@@ -3,19 +3,43 @@ var Settings = (function () {
     function Settings() {
     }
     Settings.prototype.saveForm = function () {
-        var authorization = this.makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
-        this.saveSettings(document.forms['configure']['owner'].value, document.forms['configure']['repository'].value, authorization, document.forms['configure']['title'].value);
-
+        var url = document.location.toString();
+        var result = this.checkURL(url);
+        if (result == "" || result == url) {
+            var authorization = this.makeBasicAuthentication(document.forms['configure']['user'].value, document.forms['configure']['password'].value);
+            this.saveSettings(document.forms['configure']['owner'].value, document.forms['configure']['repository'].value, authorization, document.forms['configure']['title'].value);
+        }
+        else {
+            this.saveSettingsURL(url);
+        }
         //loadContent();
         return false;
     };
     Settings.prototype.saveSettings = function (owner, repository, authorization, title) {
-        if (typeof title === "undefined") { title = null; }
+        if (title === void 0) { title = null; }
         var settings = { owner: owner, repository: repository, authorization: authorization, title: title };
         this.owner = owner;
         this.repository = repository;
         this.authorization = authorization;
         this.title = title;
+        localStorage.setItem("IssuePanel.settings", JSON.stringify(settings));
+    };
+    Settings.prototype.checkURL = function (url) {
+        var queryStart = url.indexOf("?") + 1;
+        var queryEnd = url.indexOf("#") + 1 || url.length + 1;
+        var query = url.slice(queryStart, queryEnd - 1);
+        return query;
+    };
+    Settings.prototype.saveSettingsURL = function (url) {
+        var queryStart = url.indexOf("?") + 1;
+        var queryEnd = url.indexOf("#") + 1 || url.length + 1;
+        var query = url.slice(queryStart, queryEnd - 1);
+        var pairs = query.replace(/\+/g, " ").split("&");
+        this.title = pairs[0];
+        this.owner = pairs[1];
+        this.repository = pairs[2];
+        this.authorization = pairs[3];
+        var settings = { owner: this.owner, repository: this.repository, authorization: this.authorization, title: this.title };
         localStorage.setItem("IssuePanel.settings", JSON.stringify(settings));
     };
     Settings.prototype.makeBasicAuthentication = function (user, password) {
@@ -28,7 +52,6 @@ var Settings = (function () {
     };
     return Settings;
 })();
-
 var Label = (function () {
     function Label(color, name, owner, repository) {
         this.color = color;
@@ -42,7 +65,8 @@ var Label = (function () {
         if (asDecimal > 7814560) {
             //if (asDecimal > 38911) {
             background = 'lightBackground';
-        } else
+        }
+        else
             background = 'darkBackground';
         var html_url = 'https://github.com/' + this.owner + '/' + this.repository + '/labels/' + this.name + '/';
         return '<span  onclick="window.open(\'' + html_url + '\').focus()" style="background: #' + this.color + '" span< class="' + background + '">' + this.name + '</span>';
@@ -50,7 +74,6 @@ var Label = (function () {
     };
     return Label;
 })();
-
 var Issue = (function () {
     function Issue(number, state, title, assignee, milestoneID, labels, url, body) {
         var _this = this;
@@ -96,7 +119,6 @@ var Issue = (function () {
     };
     return Issue;
 })();
-
 var Assignee = (function () {
     function Assignee(avatar_url, login) {
         this.avatar_url = avatar_url;
@@ -107,7 +129,6 @@ var Assignee = (function () {
     };
     return Assignee;
 })();
-
 var Milestone = (function () {
     function Milestone(id, title, description, open_issues, closed_issues, owner, repository) {
         var _this = this;
@@ -136,7 +157,6 @@ var Milestone = (function () {
         enumerable: true,
         configurable: true
     });
-
     Milestone.prototype.renderProgress = function () {
         return '<span class="progress-bar">' + '<span class="progress" style="width: ' + this.finished + '%" ></span>' + '<span class="percent">' + Math.round(this.finished) + '%</span>' + '</span>';
     };
@@ -155,7 +175,6 @@ var Milestone = (function () {
     };
     return Milestone;
 })();
-
 var LoadData = (function () {
     function LoadData() {
         var _this = this;
@@ -179,7 +198,6 @@ var LoadData = (function () {
                 var eTag = request.getResponseHeader('ETag');
                 if (_this.milestonesETag != eTag) {
                     _this.milestonesETag = eTag;
-
                     for (var i = 0; i < data.length; i++) {
                         _this.milestones[i] = new Milestone(data[i].id, data[i].title, data[i].description, data[i].open_issues, data[i].closed_issues, settings.owner, settings.repository);
                     }
@@ -221,7 +239,6 @@ var LoadData = (function () {
             }, false);
             Issue.loadIssues(function (data, status, request) {
                 var eTag = request.getResponseHeader('ETag');
-
                 if (_this.closedETag != eTag) {
                     _this.closedETag = eTag;
                     _this.closed = [];
@@ -272,7 +289,6 @@ var LoadData = (function () {
     };
     return LoadData;
 })();
-
 function exec() {
     var settings = new Settings();
     settings.saveForm();
@@ -280,8 +296,8 @@ function exec() {
     loader.loadContent(settings);
     return false;
 }
-
 $(document).ready(function () {
+    exec();
     $('#open').click(exec);
     $('#openSettings').click(function () {
         document.getElementById("settings").style.visibility = "visible";
